@@ -1,0 +1,14 @@
+---
+server.host: 0.0.0.0
+server.shutdownTimeout: 5s
+elasticsearch.hosts: ['https://{{ elastic_hostname }}:9200']
+monitoring.ui.container.elasticsearch.enabled: true
+
+elasticsearch.username: '{{ kibana_system_user }}'
+elasticsearch.password: '{{ kibana_system_password }}'
+elasticsearch.ssl.certificateAuthorities: [/usr/share/kibana/config/certs/ca.crt]
+
+xpack.security.encryptionKey: "5C2iALWzGaixWXxEdJ4AWFMzcMgbdijF"
+xpack.encryptedSavedObjects.encryptionKey: "EtgsQKzH0jiE6KyFCzetHoFH6m9E0gu1"
+xpack.reporting.encryptionKey: "xzTxTCrPmd1JEqmApfZAD7QTibuC0Kjn"
+xpack.reporting.kibanaServer.hostname: localhost

@@ -1,0 +1,6 @@
+---
+kibana_service_name: kibana
+kibana_image_name: kibana:8.3.3
+kibana_system_user: kibana_system
+
+set_kibana_system_password: true

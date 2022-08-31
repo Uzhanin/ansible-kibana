@@ -1,0 +1,56 @@
+---
+
+- name: Create directories if not exist
+  file:
+    path: '{{ item }}'
+    state: directory
+    mode: '0775'
+  with_items:
+    - /data/kibana/data
+    - /data/kibana/config/certs
+
+- name: Copy ca.crt
+  copy:
+    src: ../../files/certs/ca.crt
+    dest: /data/kibana/config/certs
+
+- name: Create kibana.yml
+  template:
+    src: kibana.yml.j2
+    dest: /data/kibana/config/kibana.yml
+
+#- name: Create network for containers
+#  docker_network:
+#    name: '{{ elasticsearch_docker_network_name }}'
+    
+- name: Set password for kibana_system user
+  command: |
+    curl -s -X POST --cacert /data/kibana/config/certs/ca.crt -u "elastic:{{ elastic_password }}" -H "Content-Type: application/json" "https://{{ elastic_hostname }}:9200/_security/user/{{ kibana_system_user }}/_password" -d "{\"password\":\"{{ kibana_system_password }}\"}"
+  register: set_pass
+  when: set_kibana_system_password
+
+- debug: var=set_pass
+  when: set_kibana_system_password
+  
+
+- name: Run kibana container
+  docker_container:
+    name: '{{ kibana_service_name }}'
+    image: '{{ kibana_image_name }}'
+    state: started
+    recreate: true
+    restart_policy: always
+#    networks:
+#      - name: '{{ elasticsearch_docker_network_name }}'
+    ports:
+      - '5601:5601'
+    volumes:
+      - /data/kibana/data:/usr/share/kibana/data:z
+      - /data/kibana/config:/usr/share/kibana/config:z
+
+- name: Make sure kibana is started
+  wait_for:
+    host: 0.0.0.0
+    port: 5601
+    #delay: 20
+    timeout: 120
